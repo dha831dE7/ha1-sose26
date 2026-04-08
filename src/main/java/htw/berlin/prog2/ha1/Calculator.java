@@ -8,19 +8,21 @@ package htw.berlin.prog2.ha1;
  */
 public class Calculator {
 
-    private String screen = "0";
+    //ATTRIBUTE
+    private String screen = "0";    //Hier wird die aktuelle Eingabe abgelegt
+    private double latestValue; //Es kann immer genau ein Wert im Speicher festgehalten werden, der mit einer Operation mit einem zweiten verknüpft werden kann
+    private String latestOperation = "";    //In dieser Variable kann eine gewählte Operation gespeichert werden
 
-    private double latestValue;
-
-    private String latestOperation = "";
-
+    //METHODEN
+    //1
     /**
      * @return den aktuellen Bildschirminhalt als String
      */
     public String readScreen() {
-        return screen;
+        return screen;  //Beim Attribut screen handelt es sich um die aktuelle Eingabe
     }
 
+    //2
     /**
      * Empfängt den Wert einer gedrückten Zifferntaste. Da man nur eine Taste auf einmal
      * drücken kann muss der Wert positiv und einstellig sein und zwischen 0 und 9 liegen.
@@ -32,10 +34,17 @@ public class Calculator {
         if(digit > 9 || digit < 0) throw new IllegalArgumentException();
 
         if(screen.equals("0") || latestValue == Double.parseDouble(screen)) screen = "";
+        /*
+        Der Vergleich latestValue == Double.parseDouble(screen) führt für den Fall, dass zwei gleiche Ziffern hintereinander
+        eingegeben werden dazu, dass die aktuelle Eingabe geleert wird..? (-> Test2f)
+        JA, UND DIES IST AUCH KORREKT/SINNVOLL!
+        (vergleiche Kommentar unter Test2h)
+         */
 
         screen = screen + digit;
     }
 
+    //3
     /**
      * Empfängt den Befehl der C- bzw. CE-Taste (Clear bzw. Clear Entry).
      * Einmaliges Drücken der Taste löscht die zuvor eingegebenen Ziffern auf dem Bildschirm
@@ -48,8 +57,14 @@ public class Calculator {
         screen = "0";
         latestOperation = "";
         latestValue = 0.0;
+        /*
+        Die Funktionsbeschreibung erfordert eigentlich,
+        dass der Wert der Variable latestValue erst dann aus dem Speicher gelöscht wird, wenn man
+        die Methode Calculator.pressClearKey() ein zweites Mal hintereinander aufruft. (-> Test2a)
+        */
     }
 
+    //4
     /**
      * Empfängt den Wert einer gedrückten binären Operationstaste, also eine der vier Operationen
      * Addition, Substraktion, Division, oder Multiplikation, welche zwei Operanden benötigen.
@@ -63,7 +78,12 @@ public class Calculator {
         latestValue = Double.parseDouble(screen);
         latestOperation = operation;
     }
+    /*
+    Prüfen, ob die zweite beschriebene Funktionalität erfolgreich ausgeführt wird,
+    diese ist nicht Implementiert (erst in der Methode pressEqualsKey() wird die tatsächliche Berechnung ausgeführt)
+     */
 
+    //5
     /**
      * Empfängt den Wert einer gedrückten unären Operationstaste, also eine der drei Operationen
      * Quadratwurzel, Prozent, Inversion, welche nur einen Operanden benötigen.
@@ -86,6 +106,7 @@ public class Calculator {
 
     }
 
+    //6
     /**
      * Empfängt den Befehl der gedrückten Dezimaltrennzeichentaste, im Englischen üblicherweise "."
      * Fügt beim ersten Mal Drücken dem aktuellen Bildschirminhalt das Trennzeichen auf der rechten
@@ -97,6 +118,7 @@ public class Calculator {
         if(!screen.contains(".")) screen = screen + ".";
     }
 
+    //7
     /**
      * Empfängt den Befehl der gedrückten Vorzeichenumkehrstaste ("+/-").
      * Zeigt der Bildschirm einen positiven Wert an, so wird ein "-" links angehängt, der Bildschirm
@@ -108,6 +130,7 @@ public class Calculator {
         screen = screen.startsWith("-") ? screen.substring(1) : "-" + screen;
     }
 
+    //8
     /**
      * Empfängt den Befehl der gedrückten "="-Taste.
      * Wurde zuvor keine Operationstaste gedrückt, passiert nichts.
