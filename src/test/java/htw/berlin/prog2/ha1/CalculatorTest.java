@@ -233,7 +233,8 @@ class CalculatorTest {
     }
     /*
     Die Methode Calculator.pressEqualsKey() kann nicht damit umgehen, wenn keine Operation gewählt wird.
-     */
+    Vierter Commit
+    */
 
     //ACHTUNG: DIESER TEST DECKT KEINE FEHLERHAFTE FUNKTIONALITÄT AUF, DER RECHNER ERFÜLLT DIESE ANFORDERUNG
     @Test
