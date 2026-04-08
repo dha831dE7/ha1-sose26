@@ -107,6 +107,7 @@ class CalculatorTest {
 
         assertEquals(expected, actual);
     }
+    //Erster Commit
 
     //Aufgabenteil1b
     @Test
@@ -126,6 +127,7 @@ class CalculatorTest {
 
         assertEquals(expected, actual);
     }
+    //Zweiter Commit
 
     //Aufgabenteil2 - 7 Tests für fehlerhafte Funktionalitäten/Abweichungen vom Verhalten des Online-Rechners
     @Test
