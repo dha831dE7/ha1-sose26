@@ -128,6 +128,11 @@ class CalculatorTest {
         assertEquals(expected, actual);
     }
     //Zweiter Commit
+    /*
+    Einführen des zweiten Speicherplatzes für die zweite Zahl (2. Summand, Subtrahend, Divisor, 2. Faktor)
+    offensichtlich sinnvoll, allerdings "beginnt die Berechnung so zu früh", dieser Test wird erstmal nicht mehr bestanden.
+
+     */
 
     //Aufgabenteil2 - 7 Tests für fehlerhafte Funktionalitäten/Abweichungen vom Verhalten des Online-Rechners
     @Test
@@ -151,8 +156,8 @@ class CalculatorTest {
     Verdacht:
     Methode Calculator.pressClearKey() funktioniert nicht wie in der Beschreibung angegeben.
     Die Methode setzt beim Betätigen unverzüglich den letzten Wert auf 0, soll dies aber erst bei zweifachem Aufruf.
-    Dritter Commit
      */
+    //Dritter Commit
 
     //ACHTUNG: DIESER TEST DECKT KEINE FEHLERHAFTE FUNKTIONALITÄT AUF, DER RECHNER ERFÜLLT DIESE ANFORDERUNG
     @Test
@@ -176,7 +181,7 @@ class CalculatorTest {
      */
 
     @Test
-    @DisplayName("Second test for incorrect implemented functionality")
+    @DisplayName("second test for incorrect implemented functionality: check for correct datatype on sqrt")
     void test2c(){
         Calculator calc = new Calculator();
 
@@ -233,8 +238,8 @@ class CalculatorTest {
     }
     /*
     Die Methode Calculator.pressEqualsKey() kann nicht damit umgehen, wenn keine Operation gewählt wird.
-    Vierter Commit
     */
+    //Vierter Commit
 
     //ACHTUNG: DIESER TEST DECKT KEINE FEHLERHAFTE FUNKTIONALITÄT AUF, DER RECHNER ERFÜLLT DIESE ANFORDERUNG
     @Test

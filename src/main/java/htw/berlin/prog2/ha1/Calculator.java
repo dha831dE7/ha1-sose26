@@ -10,8 +10,13 @@ public class Calculator {
 
     //ATTRIBUTE
     private String screen = "0";    //Hier wird die aktuelle Eingabe abgelegt
-    private double latestValue; //Es kann immer genau ein Wert im Speicher festgehalten werden, der mit einer Operation mit einem zweiten verknüpft werden kann
+    private double firstValue; //Es kann immer genau ein Wert im Speicher festgehalten werden, der mit einer Operation mit einem zweiten verknüpft werden kann
+    private double secondValue; //Speicherplatz für zweite Zahl der Rechenoperation
+
     private String latestOperation = "";    //In dieser Variable kann eine gewählte Operation gespeichert werden
+    double result;
+
+    private boolean clearStorage = false;   //Dieses Objektattribut soll ermöglichen, zwischen dem ersten und dem zweiten Benutzen des clearKey zu unterscheiden
 
     //METHODEN
     //1
@@ -33,7 +38,7 @@ public class Calculator {
     public void pressDigitKey(int digit) {
         if(digit > 9 || digit < 0) throw new IllegalArgumentException();
 
-        if(screen.equals("0") || latestValue == Double.parseDouble(screen)) screen = "";
+        if(screen.equals("0") || firstValue == Double.parseDouble(screen)) screen = "";
         /*
         Der Vergleich latestValue == Double.parseDouble(screen) führt für den Fall, dass zwei gleiche Ziffern hintereinander
         eingegeben werden dazu, dass die aktuelle Eingabe geleert wird..? (-> Test2f)
@@ -55,12 +60,21 @@ public class Calculator {
      */
     public void pressClearKey() {
         screen = "0";
-        latestOperation = "";
-        latestValue = 0.0;
+        if(this.clearStorage){
+            latestOperation = "";
+            firstValue = 0.0;
+            secondValue = 0.0;
+            this.clearStorage = false;
+        }else{
+            this.clearStorage = true;
+        }
         /*
         Die Funktionsbeschreibung erfordert eigentlich,
         dass der Wert der Variable latestValue erst dann aus dem Speicher gelöscht wird, wenn man
         die Methode Calculator.pressClearKey() ein zweites Mal hintereinander aufruft. (-> Test2a)
+
+        Verbesserung der Funktionalität so, dass sie dem Test genügt (erster Bugfix-Commit)
+        Problem: als latestValue wird die erste Zahl abgelegt und nicht die Zweite
         */
     }
 
@@ -75,12 +89,12 @@ public class Calculator {
      * @param operation "+" für Addition, "-" für Substraktion, "x" für Multiplikation, "/" für Division
      */
     public void pressBinaryOperationKey(String operation)  {
-        latestValue = Double.parseDouble(screen);
+        firstValue = Double.parseDouble(screen);
         latestOperation = operation;
     }
     /*
     Prüfen, ob die zweite beschriebene Funktionalität erfolgreich ausgeführt wird,
-    diese ist nicht Implementiert (erst in der Methode pressEqualsKey() wird die tatsächliche Berechnung ausgeführt)
+    diese ist nicht implementiert (erst in der Methode pressEqualsKey() wird die tatsächliche Berechnung ausgeführt)
      */
 
     //5
@@ -92,7 +106,7 @@ public class Calculator {
      * @param operation "√" für Quadratwurzel, "%" für Prozent, "1/x" für Inversion
      */
     public void pressUnaryOperationKey(String operation) {
-        latestValue = Double.parseDouble(screen);
+        firstValue = Double.parseDouble(screen);
         latestOperation = operation;
         var result = switch(operation) {
             case "√" -> Math.sqrt(Double.parseDouble(screen));
@@ -141,15 +155,45 @@ public class Calculator {
      * und das Ergebnis direkt angezeigt.
      */
     public void pressEqualsKey() {
-        var result = switch(latestOperation) {
-            case "+" -> latestValue + Double.parseDouble(screen);
-            case "-" -> latestValue - Double.parseDouble(screen);
-            case "x" -> latestValue * Double.parseDouble(screen);
-            case "/" -> latestValue / Double.parseDouble(screen);
-            default -> throw new IllegalArgumentException();
-        };
+        secondValue = Double.parseDouble(screen);
+        switch(latestOperation) {
+            case "+":
+                {
+                    result = firstValue + secondValue;
+                    firstValue = secondValue;
+                    secondValue = result;
+                    break;
+                }
+            case "-":
+                {
+                    result = firstValue - secondValue;
+                    firstValue = secondValue;
+                    secondValue = result;
+                    break;
+                }
+            case "x":
+                {
+                    result = firstValue * secondValue;
+                    firstValue = secondValue;
+                    secondValue = result;
+                    break;
+                }
+            case "/":
+                {
+                    result = firstValue / secondValue;
+                    firstValue = secondValue;
+                    secondValue = result;
+                    break;
+                }
+            default: //throw new IllegalArgumentException();
+                {
+                    result = secondValue;
+                }
+        }
         screen = Double.toString(result);
         if(screen.equals("Infinity")) screen = "Error";
+
+        //Hier noch lediglich Einkürzen des Ergebnisses
         if(screen.endsWith(".0")) screen = screen.substring(0,screen.length()-2);
         if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
     }
