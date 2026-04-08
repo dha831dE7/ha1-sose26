@@ -151,6 +151,7 @@ class CalculatorTest {
     Verdacht:
     Methode Calculator.pressClearKey() funktioniert nicht wie in der Beschreibung angegeben.
     Die Methode setzt beim Betätigen unverzüglich den letzten Wert auf 0, soll dies aber erst bei zweifachem Aufruf.
+    Dritter Commit
      */
 
     //ACHTUNG: DIESER TEST DECKT KEINE FEHLERHAFTE FUNKTIONALITÄT AUF, DER RECHNER ERFÜLLT DIESE ANFORDERUNG
@@ -190,7 +191,7 @@ class CalculatorTest {
     }
     /*
     Verdacht:
-    Funktionalität der Operation Calculator.pressUnaryOperationKey() sind nicht auflösbar:
+    Funktionalitäten der Operation Calculator.pressUnaryOperationKey() sind nicht auflösbar:
     Die Methode legt das Ergebnis der Kalkulation in der Variable Screen als String ab,
     diese kan allerdings von Calculator.pressEqualsKey() nicht gelesen werden.
     FALSCH! Das funktioniert wohl und liefert korrekte Ergebnisse.
