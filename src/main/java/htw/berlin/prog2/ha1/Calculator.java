@@ -6,17 +6,23 @@ package htw.berlin.prog2.ha1;
  * und dessen Bildschirm bis zu zehn Ziffern plus einem Dezimaltrennzeichen darstellen kann.
  * Enthält mit Absicht noch diverse Bugs oder unvollständige Funktionen.
  */
+
+/*
+Prinzipielle Funktionalität der Klasse:
+Es existiert eine aktuelle Eingabe (screen), deren Inhalt in zwei Variablen (first/secondValue) gespeichert werden kann.
+Daneben kann eine Operation festgelegt werden, die sich auf die erste oder beide Variablen bezieht.
+Das Wählen einer Operation setzt den ersten Speicher, das Wählen des Gleichheitszeichens den Zweiten.
+ */
 public class Calculator {
 
     //ATTRIBUTE
     private String screen = "0";    //Hier wird die aktuelle Eingabe abgelegt
+
     private double firstValue; //Es kann immer genau ein Wert im Speicher festgehalten werden, der mit einer Operation mit einem zweiten verknüpft werden kann
     private double secondValue; //Speicherplatz für zweite Zahl der Rechenoperation
 
     private String latestOperation = "";    //In dieser Variable kann eine gewählte Operation gespeichert werden
     double result;
-
-    private boolean clearStorage = false;   //Dieses Objektattribut soll ermöglichen, zwischen dem ersten und dem zweiten Benutzen des clearKey zu unterscheiden
 
     //METHODEN
     //1
@@ -41,7 +47,7 @@ public class Calculator {
         if(screen.equals("0") || firstValue == Double.parseDouble(screen)) screen = "";
         /*
         Der Vergleich latestValue == Double.parseDouble(screen) führt für den Fall, dass zwei gleiche Ziffern hintereinander
-        eingegeben werden dazu, dass die aktuelle Eingabe geleert wird..? (-> Test2f)
+        eingegeben werden dazu, dass die aktuelle Eingabe geleert wird..? (Siehe Test2f)
         JA, UND DIES IST AUCH KORREKT/SINNVOLL!
         (vergleiche Kommentar unter Test2h)
          */
@@ -50,6 +56,7 @@ public class Calculator {
     }
 
     //3
+    private boolean clearStorage = false;   //Dieses Objektattribut soll ermöglichen, zwischen dem ersten und dem zweiten Benutzen des clearKey zu unterscheiden
     /**
      * Empfängt den Befehl der C- bzw. CE-Taste (Clear bzw. Clear Entry).
      * Einmaliges Drücken der Taste löscht die zuvor eingegebenen Ziffern auf dem Bildschirm
@@ -60,18 +67,26 @@ public class Calculator {
      */
     public void pressClearKey() {
         screen = "0";
-        if(this.clearStorage){
-            latestOperation = "";
-            firstValue = 0.0;
+
+        latestOperation = "";
+        operationCheckIn = false;
+
+        firstValue = 0.0;
+        firstValueCheckIn = false;
+
+        if(clearStorage){
             secondValue = 0.0;
-            this.clearStorage = false;
+            secondValueCheckIn = false;
+
+            clearStorage = false;
+            repeat = false;
         }else{
-            this.clearStorage = true;
+            clearStorage = true;
         }
         /*
         Die Funktionsbeschreibung erfordert eigentlich,
         dass der Wert der Variable latestValue erst dann aus dem Speicher gelöscht wird, wenn man
-        die Methode Calculator.pressClearKey() ein zweites Mal hintereinander aufruft. (-> Test2a)
+        die Methode Calculator.pressClearKey() ein zweites Mal hintereinander aufruft. (Siehe Test2a)
 
         Verbesserung der Funktionalität so, dass sie dem Test genügt (erster Bugfix-Commit)
         Problem: als latestValue wird die erste Zahl abgelegt und nicht die Zweite
@@ -88,9 +103,22 @@ public class Calculator {
      * auf dem Bildschirm angezeigt. Falls hierbei eine Division durch Null auftritt, wird "Error" angezeigt.
      * @param operation "+" für Addition, "-" für Substraktion, "x" für Multiplikation, "/" für Division
      */
-    public void pressBinaryOperationKey(String operation)  {
-        firstValue = Double.parseDouble(screen);
-        latestOperation = operation;
+    public void pressBinaryOperationKey(String operation){
+        clearStorage = false;
+
+        if(!readyToCalculate()){
+            firstValue = Double.parseDouble(screen);
+            firstValueCheckIn = true;
+
+            latestOperation = operation;
+            operationCheckIn = true;
+        }else{
+            latestOperation = operation;
+            repeat = false;
+
+            backgroundCalculation();
+            screen = Double.toString(result);
+        }
     }
     /*
     Prüfen, ob die zweite beschriebene Funktionalität erfolgreich ausgeführt wird,
@@ -106,14 +134,21 @@ public class Calculator {
      * @param operation "√" für Quadratwurzel, "%" für Prozent, "1/x" für Inversion
      */
     public void pressUnaryOperationKey(String operation) {
-        firstValue = Double.parseDouble(screen);
+        if(!firstValueCheckIn){
+            firstValue = Double.parseDouble(screen);
+            firstValueCheckIn = true;
+        }
+
         latestOperation = operation;
+        operationCheckIn = true;
+
         var result = switch(operation) {
             case "√" -> Math.sqrt(Double.parseDouble(screen));
             case "%" -> Double.parseDouble(screen) / 100;
             case "1/x" -> 1 / Double.parseDouble(screen);
             default -> throw new IllegalArgumentException();
         };
+
         screen = Double.toString(result);
         if(screen.equals("NaN")) screen = "Error";
         if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
@@ -131,6 +166,9 @@ public class Calculator {
     public void pressDotKey() {
         if(!screen.contains(".")) screen = screen + ".";
     }
+    /*
+    Methode kontrolliert, ob es bereits einen Dezimalpunkt gibt und fügt ihn hinzu, falls nicht.
+     */
 
     //7
     /**
@@ -143,8 +181,13 @@ public class Calculator {
     public void pressNegativeKey() {
         screen = screen.startsWith("-") ? screen.substring(1) : "-" + screen;
     }
+    /*
+    Ternärer Operator fügt Vorzeichen hinzu oder entfernt es, je nachdem ob das erste Zeichen
+    der aktuellen Eingabe das Vorzeichen war oder nicht
+     */
 
     //8
+    private boolean repeat = false;
     /**
      * Empfängt den Befehl der gedrückten "="-Taste.
      * Wurde zuvor keine Operationstaste gedrückt, passiert nichts.
@@ -155,41 +198,18 @@ public class Calculator {
      * und das Ergebnis direkt angezeigt.
      */
     public void pressEqualsKey() {
-        secondValue = Double.parseDouble(screen);
-        switch(latestOperation) {
-            case "+":
-                {
-                    result = firstValue + secondValue;
-                    firstValue = secondValue;
-                    secondValue = result;
-                    break;
-                }
-            case "-":
-                {
-                    result = firstValue - secondValue;
-                    firstValue = secondValue;
-                    secondValue = result;
-                    break;
-                }
-            case "x":
-                {
-                    result = firstValue * secondValue;
-                    firstValue = secondValue;
-                    secondValue = result;
-                    break;
-                }
-            case "/":
-                {
-                    result = firstValue / secondValue;
-                    firstValue = secondValue;
-                    secondValue = result;
-                    break;
-                }
-            default: //throw new IllegalArgumentException();
-                {
-                    result = secondValue;
-                }
+        if(!repeat) {
+            secondValue = Double.parseDouble(screen);
+            secondValueCheckIn = true;
+            repeat = true;
         }
+
+        if(readyToCalculate()) {
+            backgroundCalculation();
+        }else{
+            result = secondValue;
+        }
+
         screen = Double.toString(result);
         if(screen.equals("Infinity")) screen = "Error";
 
@@ -197,4 +217,57 @@ public class Calculator {
         if(screen.endsWith(".0")) screen = screen.substring(0,screen.length()-2);
         if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
     }
+
+    private boolean firstValueCheckIn = false;
+    private boolean secondValueCheckIn = false;
+    private boolean operationCheckIn = false;
+    /*
+    Die Attribute readyToCalculate und die drei CheckIn-Attribute sollen sicherstellen, dass der Rechner
+    'weiß', ob die entsprechenden Attribute auch mit den durch den Benutzer gewünschten Werten belegt sind.
+     */
+    /**
+     * Diese Methode kann angeben, ob alle drei (bzw. zwei) für eine Berechnung erforderlichen Eingaben
+     * (erste, ggf zweite Zahl und Operation) auch durch den Bediener so gewünscht sind.
+     * @return den Zustand, der drei mit logischem und verknüpften CheckIn-Attribute
+     */
+    private boolean readyToCalculate(){
+        return firstValueCheckIn && secondValueCheckIn && operationCheckIn;
+    }
+
+    /**
+     * Diese Methode dient dazu, im Fall konsekutiver Operationen Schrittweise das korrekte Ergebnis anzuzeigen
+     */
+    public void backgroundCalculation(){
+        if(readyToCalculate()) {
+            switch (latestOperation) {
+                case "+": {
+                    result = firstValue + secondValue;
+                    break;
+                }
+                case "-": {
+                    result = firstValue - secondValue;
+                    break;
+                }
+                case "x": {
+                    result = firstValue * secondValue;
+                    break;
+                }
+                case "/": {
+                    result = firstValue / secondValue;
+                    break;
+                }
+                default: //throw new IllegalArgumentException();
+                {
+                    result = secondValue;
+                    break;
+                }
+            }
+            firstValue = result;
+        }
+    }
 }
+
+/*
+Wichtig fürs mathematische Verständnis:
+'Berechnen' bedeutet in diesem Rechner, die Variable result mit einem Inhalt zu belegen.
+ */

@@ -131,7 +131,12 @@ class CalculatorTest {
     /*
     Einführen des zweiten Speicherplatzes für die zweite Zahl (2. Summand, Subtrahend, Divisor, 2. Faktor)
     offensichtlich sinnvoll, allerdings "beginnt die Berechnung so zu früh", dieser Test wird erstmal nicht mehr bestanden.
-
+    Aktuell funktioniert der Test deshalb nicht, weil nach dem Betätigen des Gleichheitszeichens
+    auf der aktuellen Ausgabe result stehen bleibt, welches bei erneutem Betätigen des Gleichheitszeichens
+    in die zweite Variable gelegt wird.
+    Erkenntnis: Ein Wert muss an die Operation gebunden bleiben.
+    Aktuell funktioniert der Test deshalb nicht, weil nicht immer +3 gerechnet wird, sondern 6 + 9 = 15.
+    Wenn ich aber diese Funktionalität ändere, kann man mit "=" nicht mehr auf den zweiten Wert zugreifen (2a)
      */
 
     //Aufgabenteil2 - 7 Tests für fehlerhafte Funktionalitäten/Abweichungen vom Verhalten des Online-Rechners
@@ -322,7 +327,13 @@ class CalculatorTest {
         calc.pressDigitKey(2);
         calc.pressBinaryOperationKey("+");
         calc.pressDigitKey(7);
+        //calc.pressEqualsKey();
         calc.pressBinaryOperationKey("-");
+        /*
+        Hier wird klar, dass - im Gegensatz zum Online-Rechner - das Betätigen einer Operationstaste
+        unmittelbar nach dem Eingeben der zweiten Zahl einer Berechnung nicht im Hintergrund automatisch
+        diese Berechnung auslöst.
+         */
 
         String expected = "9";
         String actual = calc.readScreen();
