@@ -163,6 +163,18 @@ class CalculatorTest {
     Die Methode setzt beim Betätigen unverzüglich den letzten Wert auf 0, soll dies aber erst bei zweifachem Aufruf.
      */
     //Dritter Commit
+    /*
+    NOTIZ:
+    Die Funktionalität von pressClearKey() sperrt nach dem erstmaligen Betätigen die Methode pressEqualsKey()
+    für weitere Berechnungen. Verhalten an Online-Rechner angepasst:
+    Bei Betätigen von '=', nachdem man nach erfolgter Auswertung pressClearKey() aufgerufen hat zählt
+    die Reihe des secondValue hoch.
+    Allerdings verstößt der Rechner nun gegen ein weiteres Verhalten des Online-Vorbildes:
+    Möchte man mit pressClearKey() lediglich Eingabe für secondValue korrigieren bleibt die Operation UND
+    der firstValue erhalten.
+
+    (Da ich für dieses Verhalten aber keinen Testfall gemacht habe funktioniert der gradle-Test trotzdem)
+     */
 
     //ACHTUNG: DIESER TEST DECKT KEINE FEHLERHAFTE FUNKTIONALITÄT AUF, DER RECHNER ERFÜLLT DIESE ANFORDERUNG
     @Test
@@ -327,7 +339,6 @@ class CalculatorTest {
         calc.pressDigitKey(2);
         calc.pressBinaryOperationKey("+");
         calc.pressDigitKey(7);
-        //calc.pressEqualsKey();
         calc.pressBinaryOperationKey("-");
         /*
         Hier wird klar, dass - im Gegensatz zum Online-Rechner - das Betätigen einer Operationstaste
@@ -341,6 +352,40 @@ class CalculatorTest {
         assertEquals(expected, actual);
     }
     /*
-    Methode soll korrektes Verhalten bei aufeinanderfolgenden Berechnungen prüfen
+    Methode soll korrektes Verhalten bei aufeinanderfolgenden Berechnungen prüfen,
+    analog zu Test2j soll hier das Verhalten der Methode pressBinaryOperationKey() bei Anwendung
+    unmittelbar nach einer Berechnung ohne zwischenzeitliches Aufrufen von pressEqualsKey() geprüft werden.
+    Allerdings soll - anders als bei der unären Operation - mit dem Ergebnis der Berechnung und nicht
+    mit dem zweiten Zahlenwert weiter gerechnet werden.
+     */
+
+    //ACHTUNG: DIESER TEST DIENT ZUR KONTROLLE DER KORREKTEN FUNKTIONALITÄT DES RECHNERS
+    @Test
+    @DisplayName("correct behaviour on follow-up unary operation")
+    void test2j(){
+        Calculator calc = new Calculator();
+
+        calc.pressDigitKey(4);
+        calc.pressBinaryOperationKey("+");
+        calc.pressDigitKey(9);
+        calc.pressUnaryOperationKey("√");
+
+        String expected = "3";
+        String actual = calc.readScreen();
+
+        assertEquals(expected, actual);
+    }
+    /*
+    Soll korrektes Verhalten der Methode pressUnaryOperationKey() sicherstellen,
+    falls sie direkt nach einer Berechnung ohne zwischenzeitliches Aufrufen von
+    pressEqualsKey() aufgerufen wird.
+    Wie beim Online-Rechner bezieht es sich dann nämlich auf den secondValue.
+     */
+
+
+    /*
+    Bilanz:
+    5 grüne und 7 zunächst rote Tests gefunden.
+    Aktuell noch rote Tests: 0
      */
 }
