@@ -24,6 +24,7 @@ public class Calculator {
     private String latestOperation = "";    //In dieser Variable kann eine gewählte Operation gespeichert werden
     double result;
 
+
     //METHODEN
     //1
     /**
@@ -68,17 +69,26 @@ public class Calculator {
     public void pressClearKey() {
         screen = "0";
 
-        latestOperation = "";
-        operationCheckIn = false;
-
-        firstValue = 0.0;
-        firstValueCheckIn = false;
+        /*
+        Diese Bedingung ist nicht sinnvoll, aber erforderlich um sicherzustellen,
+        dass der Rechner sich wie der Online-Rechner verhält (vgl Tests 2a und 2e).
+        */
+        if(operationCheckIn){
+            firstValue = 0.0;
+        }
 
         if(clearStorage){
+            latestOperation = "";
+            operationCheckIn = false;
+
+            firstValue = 0.0;
+            firstValueCheckIn = false;
+
             secondValue = 0.0;
             secondValueCheckIn = false;
 
             clearStorage = false;
+            consecutive = false;
             repeat = false;
         }else{
             clearStorage = true;
@@ -94,6 +104,7 @@ public class Calculator {
     }
 
     //4
+    private boolean consecutive = false;
     /**
      * Empfängt den Wert einer gedrückten binären Operationstaste, also eine der vier Operationen
      * Addition, Substraktion, Division, oder Multiplikation, welche zwei Operanden benötigen.
@@ -104,25 +115,42 @@ public class Calculator {
      * @param operation "+" für Addition, "-" für Substraktion, "x" für Multiplikation, "/" für Division
      */
     public void pressBinaryOperationKey(String operation){
+        //Zurücksetzen der Unterscheidungsvariable für die Löschen-Taste (Operation soll beim ersten Drücken noch erhalten bleiben)
         clearStorage = false;
 
+        //Verzweigung, falls zuvor abgeschlossene Berechnung existiert:
+        if(consecutive){
+            //Belegen der für die Kalkulation erforderlichen Variablen
+            secondValue = Double.parseDouble(screen);
+            secondValueCheckIn = true;
+
+            //Ausführen der mathematischen Kalkulation mit der aktuellen Variablenbelegung
+            backgroundCalculation();
+
+            //Behandlung der Anzeige
+            screen = Double.toString(result);
+            if(screen.endsWith(".0")) screen = screen.substring(0,screen.length()-2);
+            if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
+        }
+
+        //Verzweigung, falls Belegung der Variablen für neue Berechnung gestartet werden soll
         if(!readyToCalculate()){
             firstValue = Double.parseDouble(screen);
             firstValueCheckIn = true;
 
             latestOperation = operation;
             operationCheckIn = true;
+
+            //Erforderliche Unterscheidungsvariable, damit mit erneutem Drücken der Taste Funktionalität des Gleichheitszeichens umfasst wird
+            consecutive = true;
         }else{
+            //Gerade unklar
             latestOperation = operation;
             repeat = false;
-
-            backgroundCalculation();
-            screen = Double.toString(result);
         }
     }
     /*
-    Prüfen, ob die zweite beschriebene Funktionalität erfolgreich ausgeführt wird,
-    diese ist nicht implementiert (erst in der Methode pressEqualsKey() wird die tatsächliche Berechnung ausgeführt)
+    Programmierung der zweiten im Javadoc beschriebenen Funktionalität.
      */
 
     //5
@@ -137,7 +165,12 @@ public class Calculator {
         if(!firstValueCheckIn){
             firstValue = Double.parseDouble(screen);
             firstValueCheckIn = true;
+        }else{
+            firstValue = Double.parseDouble(screen);
         }
+        /*
+        Im else-Zweig wird das korrekte Verhalten der Methode in der konsekutiven Verwendung sichergestellt.
+         */
 
         latestOperation = operation;
         operationCheckIn = true;
@@ -151,8 +184,11 @@ public class Calculator {
 
         screen = Double.toString(result);
         if(screen.equals("NaN")) screen = "Error";
+
+        if(screen.endsWith(".0")) screen = screen.substring(0,screen.length()-2);
         if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
 
+        repeat = false;
     }
 
     //6
@@ -187,9 +223,9 @@ public class Calculator {
      */
 
     //8
-    private boolean repeat = false;
+    private boolean repeat = false; //Hilfsattribut
     /**
-     * Empfängt den Befehl der gedrückten "="-Taste.
+     * Empfängt den Befehl der gedrückten '='-Taste.
      * Wurde zuvor keine Operationstaste gedrückt, passiert nichts.
      * Wurde zuvor eine binäre Operationstaste gedrückt und zwei Operanden eingegeben, wird das
      * Ergebnis der Operation angezeigt. Falls hierbei eine Division durch Null auftritt, wird "Error" angezeigt.
@@ -218,6 +254,7 @@ public class Calculator {
         if(screen.contains(".") && screen.length() > 11) screen = screen.substring(0, 10);
     }
 
+    //9
     private boolean firstValueCheckIn = false;
     private boolean secondValueCheckIn = false;
     private boolean operationCheckIn = false;
@@ -234,8 +271,12 @@ public class Calculator {
         return firstValueCheckIn && secondValueCheckIn && operationCheckIn;
     }
 
+    //10
     /**
-     * Diese Methode dient dazu, im Fall konsekutiver Operationen Schrittweise das korrekte Ergebnis anzuzeigen
+     * Diese Methode lagert die Kalkulation hinter der Methode pressEqualsKey() aus,
+     * sodass sie nur noch Display- und Variablenbelegungs-Funktionen übernimmt.
+     * Daneben dient sie dazu, im Fall konsekutiver Operationen Schrittweise
+     * das korrekte Ergebnis anzuzeigen.
      */
     public void backgroundCalculation(){
         if(readyToCalculate()) {
@@ -262,7 +303,7 @@ public class Calculator {
                     break;
                 }
             }
-            firstValue = result;
+            firstValue = result;    //Ergebnis im ersten Speicher ablegen
         }
     }
 }
